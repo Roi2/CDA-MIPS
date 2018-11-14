@@ -8,7 +8,7 @@ ImgData: .space 1048576
 .data 0x10210000
 buff: .space 786486 	
 
-filename: .asciiz "lena.bmp"
+filename: .asciiz "tesla.bmp"
 .data	
 Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor|\n\n***********************************\nPlease Enter One Of The Following int Values:\n\n 1.Filp H\n 2.Flip V\n 3.Color adjustments\n 4.Sobel Edge Detiction\n 5.Contrast\n 6.Reset Image\n 7.Exit\n "
 InError: .asciiz "Wrong Input !\n Please Try Again"
