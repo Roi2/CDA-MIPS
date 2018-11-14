@@ -14,6 +14,7 @@ Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor|\n\n***************
 InError: .asciiz "Wrong Input !\n Please Try Again"
 FIleErrorMsg: .asciiz "File Error\nterminating program..."
 .text
+Start:
 la $a0, filename	#open file
 li $v0, 13
 li $a1, 0
@@ -35,11 +36,10 @@ fpnull:
 move $s5, $v0
 # Close the file 
 li   $v0, 16       	
-move $a0, $s6      	# 
+move $a0, $s1      	# 
 syscall            	# close file
 
 ##############################################
-
 
 subi $s5, $s5, 54 	
 div $s5, $s5, 3		
@@ -95,21 +95,8 @@ inverte:
 
 la $a0, ImgData
 jal flip_horizontal
-b printi
+b UpdateImage
 
-printi:
-la $s1, ImgData		#
-li $s3, 0x10010000	#
-move $s4, $zero		# i = 0
-
-loop2:
-bge $s4, $s5, menu
-lw $s2, ($s1)
-sw $s2, ($s3)
-addi $s1, $s1, 4
-addi $s3, $s3, 4
-addi $s4, $s4, 1
-b loop2
 menu:
 la $a0, Welcome
 li $v0, 51
@@ -139,6 +126,9 @@ syscall
 j menu
 
 FilpH:
+la $a0, ImgData
+jal flip_horizontal
+j UpdateImage
 j menu
 
 FilpV:
@@ -156,7 +146,24 @@ Contrast:
 j menu
 
 Reset:
+b Start
 j menu
+
+UpdateImage:
+la $s1, ImgData		#
+li $s3, 0x10010000	#
+move $s4, $zero		# i = 0
+
+loop2:
+bge $s4, $s5, end_loop
+lw $s2, ($s1)
+sw $s2, ($s3)
+addi $s1, $s1, 4
+addi $s3, $s3, 4
+addi $s4, $s4, 1
+b loop2
+end_loop:
+b menu
 
 Exit:
 li $v0 ,10
