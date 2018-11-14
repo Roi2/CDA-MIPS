@@ -1,6 +1,6 @@
 .data 0x10010000
 
-
+#Space asigned for MIPS BitMap
 .data 0x10110000
 
 ImgData: .space 1048576 
@@ -8,9 +8,10 @@ ImgData: .space 1048576
 .data 0x10210000
 buff: .space 786486 	
 
-filename: .asciiz "tesla.bmp"
+filename: .asciiz "lena.bmp"
+OutFile: .asciiz "test.bmp"
 .data	
-Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor|\n\n***********************************\nPlease Enter One Of The Following int Values:\n\n 1.Filp H\n 2.Flip V\n 3.Color adjustments\n 4.Sobel Edge Detiction\n 5.Contrast\n 6.Reset Image\n 7.Exit\n "
+Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor|\n\n***********************************\nPlease Enter One Of The Following int Values:\n\n 1.Filp H\n 2.Flip V\n 3.Color adjustments\n 4.Sobel Edge Detiction\n 5.Contrast\n 6.Reset Image\n 7.Save File\n 8.Exit\n "
 InError: .asciiz "Wrong Input !\n Please Try Again"
 FIleErrorMsg: .asciiz "File Error\nterminating program..."
 .text
@@ -116,7 +117,9 @@ beq $t0,$t1, Contrast
 li $t0, 6
 beq $t0,$t1, Reset
 li $t0, 7
-beq $t0,$t1, Exit
+beq $t0,$t1, SaveBMP
+li $t0, 8
+beq $t0,$t1,Exit
 
 InputError:
 la $a0,InError
@@ -129,7 +132,6 @@ FilpH:
 la $a0, ImgData
 jal flip_horizontal
 j UpdateImage
-j menu
 
 FilpV:
 
@@ -147,6 +149,9 @@ j menu
 
 Reset:
 b Start
+
+SaveBMP:
+jal FileSave
 j menu
 
 UpdateImage:
@@ -199,5 +204,32 @@ end_linha:
 addi $t5, $t5, 1	# j++
 j loop_coluna
 end_colunas:
+
+jr $ra
+FileSave:
+
+la $a0, OutFile	#open file
+li $v0, 13
+li $a1, 1
+li $a2, 0
+syscall
+move $s7, $v0		# Store File Pointer
+move $a0, $v0
+li $v0, 15		#Read File To Buffer
+la $a1, buff
+li $a2, 786486
+syscall
+bgt $v0, 0, CloseOut	#if file not read brake
+la $a0,FIleErrorMsg
+li $a1, 2
+li $v0,55
+syscall
+break
+CloseOut:
+move $t8, $v0
+# Close the file 
+li   $v0, 16       	
+move $a0, $s7      	# 
+syscall            	# close file
 
 jr $ra
