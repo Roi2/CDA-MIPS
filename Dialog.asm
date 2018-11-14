@@ -77,7 +77,7 @@ addi $s4, $s4, 1
 b  loop
 end_adj:
 
-move $s4, $zero		# i = 0
+li $s4, 0   # i = 0
 
 subi $s0, $s1, 4	#
 la $s1, ImgData		#
@@ -95,7 +95,7 @@ j loop3
 inverte:
 
 la $a0, ImgData
-jal flip_horizontal
+jal Flip_h
 b UpdateImage
 
 menu:
@@ -130,13 +130,15 @@ j menu
 
 FilpH:
 la $a0, ImgData
-jal flip_horizontal
+jal Flip_h
 j UpdateImage
 
 FilpV:
 
+la $a0, ImgData
+jal Flip_v
+j UpdateImage
 
-j menu
 
 ColorAdj:
 j menu
@@ -174,8 +176,8 @@ Exit:
 li $v0 ,10
 syscall
 j menu
-flip_horizontal:
-move $t5, $0		# j = 0
+Flip_h:
+li $t5, 0		# j = 0
 
 loop_coluna:
 bge $t5, 512, end_colunas
@@ -206,6 +208,39 @@ j loop_coluna
 end_colunas:
 
 jr $ra
+Flip_v:
+li $t5, 0
+flip_vert:
+bge $t5, 256, end_flip_vert
+
+move $t0, $a0		# x0, y0
+addi $t1, $t0, 1046528	# x0, y min;
+
+mulo $t6, $t5, 2048	# ajusta linha
+add $t0, $t0, $t6	# t0 = linha (j)
+
+sub $t1, $t1, $t6	# t1 = -linha (j)+512
+
+
+move $t4, $0		# i = 0
+swap:
+bge $t4, 512, end_swap
+lw $t2, ($t0)		# swap
+lw $t3, ($t1)
+sw $t3, ($t0)
+sw $t2, ($t1)
+
+addi $t0, $t0, 4
+addi $t1, $t1, 4
+
+addiu $t4, $t4, 1	# i ++
+j swap
+end_swap:
+
+
+addi $t5, $t5, 1	# j++
+j flip_vert
+end_flip_vert:
 FileSave:
 
 la $a0, OutFile	#open file
@@ -215,8 +250,8 @@ li $a2, 0
 syscall
 move $s7, $v0		# Store File Pointer
 move $a0, $v0
-li $v0, 15		#Read File To Buffer
-la $a1, buff
+li $v0, 15		#Wrtie File To Buffer
+la $a1, buff	
 li $a2, 786486
 syscall
 bgt $v0, 0, CloseOut	#if file not read brake
