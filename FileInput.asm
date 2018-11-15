@@ -1,29 +1,29 @@
 .data
 imageName: .asciiz "step2.bmp"
 green: .word 0x0000ff00
-address: .word 0x10040000
-buffer: .word 0
+address: .word 0x10010040
+buffer: .space 196608
 size: .word 196608
 
 .text
 
-#initialize:
-#	lw $t1, address
-#	lw $t2, size
-#	lw $t3, green
-#	
-#	j backgroundInitialize
+initialize:
+	lw $t1, address
+	lw $t2, size
+	lw $t3, green
+	
+	j backgroundInitialize
 
-#backgroundInitialize:
+backgroundInitialize:
 	
-#	sw $t3, 0($t1)
-
-#	addi $t1, $t1, 4
+	sw $t3, 0($t1)
 	
-#	beq $t2, $zero, end
-#	addi $t2, $t2, -1
+	addi $t1, $t1, 4
 	
-#	j backgroundInitialize
+	beq $t2, $zero, imageInput
+	addi $t2, $t2, -1
+	
+	j backgroundInitialize
 
 imageInput:
 
@@ -40,14 +40,10 @@ imageInput:
 	# Setting parameter before entering loop #
 	move $a0, $t1
 	la $a1, buffer
-	li $a2, 10
+	li $a2, 196608
 	la $t9, address
 	
 	j loop
-	
-	
-	li $v0, 10
-	syscall
 	
 loop:
 
@@ -59,7 +55,7 @@ loop:
 	lw $t0, 0($a1)
 	sw $t0, 0($t9)
 	
-	addi $a1, $a1, 4
+	addi $a1, $a1, 4 
 	addi $t9, $t9, 4
 	addi $a3, $a3, -1
 	
@@ -71,9 +67,10 @@ closeFile:
 	move $a0, $t1
 	syscall
 	
-	jr $ra
+	j end
 	
 end:
-	jr $ra
+	li $v0, 10
+	syscall
 	
 	
