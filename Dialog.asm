@@ -8,31 +8,39 @@ ImgData: .space 1048576
 .data 0x10210000
 buff: .space 786486 	
 
-filename: .asciiz "lena.bmp"
+filename: .asciiz "tesla.bmp"
 OutFile: .asciiz "test.bmp"
 .data	
-Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor|\n\n***********************************\nPlease Enter One Of The Following int Values:\n\n 1.Filp H\n 2.Flip V\n 3.Color adjustments\n 4.Sobel Edge Detiction\n 5.Contrast\n 6.Reset Image\n 7.Save File\n 8.Exit\n "
-InError: .asciiz "Wrong Input !\n Please Try Again"
-FIleErrorMsg: .asciiz "File Error\nterminating program..."
+Welcome: .asciiz "|   Welcome  |\n\n\n| MIPS Image Processor |\n\n***********************************\nPlease Select Your Option:\n\n 1.Filp Horizontally\n 2.Flip Vertically\n 3.Color Adjustments\n 4.Sobel Edge Detection\n 5.Contrast\n 6.Reset Image\n 7.Save File\n 8.Exit\n "
+InError: .asciiz "Wrong Input!\nPlease Try Again"
+FIleErrorMsg: .asciiz "File Error\nTerminating program..."
+
 .text
+
 Start:
-la $a0, filename	#open file
-li $v0, 13
-li $a1, 0
-li $a2, 0
+la $a0, filename	# Establishing the name of the file as a parameter
+li $v0, 13		# Storing syscall value for file opening 
+li $a1, 0		# Setting argument to read mode
+li $a2, 0		# Empty argument
 syscall
-move $s1, $v0		# Store File Pointer
-move $a0, $v0
-li $v0, 14		#Read File To Buffer
-la $a1, buff
-li $a2, 786486
+
+move $s1, $v0		# Storing file pointer
+
+move $a0, $v0		# Establishing the file pointer as a parameter
+li $v0, 14		# Storing syscall value for file reading
+la $a1, buff		# Setting buffer as argument
+li $a2, 786486		# Setting maximum number of character as argument
 syscall
-bgt $v0, 0, fpnull	#if file not read brake
-la $a0,FIleErrorMsg
-li $a1, 2
-li $v0,55
+
+bgt $v0, 0, fpnull	# Checking if the file was successfully opened
+la $a0,FIleErrorMsg	# Loading error message as argument
+li $a1, 2		# Setting warning message as argument
+li $v0,55		# Storing syscall value for dialog message
 syscall
-break
+
+break 			# Breaking out of the program
+
+# If file was successfully opened, continue here #
 fpnull:
 move $s5, $v0
 # Close the file 
@@ -260,11 +268,12 @@ li $a1, 2
 li $v0,55
 syscall
 break
+
+# Closing the file - Either input or output #
 CloseOut:
-move $t8, $v0
-# Close the file 
-li   $v0, 16       	
-move $a0, $s7      	# 
-syscall            	# close file
+move $t8, $v0 		# Storing the current value of v0 into a register DO WE NEED THIS?
+li   $v0, 16       	# Storing syscall value for file closing 
+move $a0, $s7      	# Setting the file pointer as an argument for the syscall
+syscall            	
 
 jr $ra
