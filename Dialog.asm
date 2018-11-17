@@ -14,6 +14,9 @@ OutFile: .asciiz "test.bmp"
 Welcome: .asciiz "|             Welcome             |\n\n\n| MIPS Image Processor |\n\n***********************************\nPlease Select Your Option:\n\n 1.Filp Horizontally\n 2.Flip Vertically\n 3.Brightness\n 4.Hue\n 5.Vibrance\n 6.Saturation\n 7.Sobel Edge Detection\n 8.Reset Image\n 9.Save File \n 10.Exit\n "
 InError: .asciiz "Wrong Input!\nPlease Try Again"
 FIleErrorMsg: .asciiz "File Error\nTerminating program..."
+red_hue: .asciiz "Please Enter a ine (0 - 255) to mod red by"
+green_hue: .asciiz "Please Enter a ine (0 - 255) to mod green by"
+blue_hue: .asciiz "Please Enter a ine (0 - 255) to mod blue by"
 
 .text
 
@@ -156,7 +159,8 @@ Brightness:
 j menu
 
 Hue:
-
+la $a0, ImgData
+b hue_fun
 j menu
 
 Vibrance:
@@ -259,6 +263,42 @@ end_swap:
 addi $t5, $t5, 1    # j++
 j flip_vert
 end_flip_vert:
+jr $ra
+hue_fun:
+move $t6, $a0
+la $a0, red_hue
+li $v0, 51
+syscall
+move $t0, $v0
+la $a0, green_hue
+syscall
+move $t1, $v0
+la $a0, blue_hue
+syscall
+move $t2, $v0
+li $s4,0
+loop_hue:
+	lb $t3, 0($t6)
+	lb $t4, 1($t6)
+	lb $t5, 2($t6)
+	sll $t3, $t3, 24
+	srl $t3, $t3, 24
+	sll $t4, $t4, 24
+	srl $t4, $t4, 24
+	sll $t5, $t5, 24
+	srl $t5, $t5, 24
+	add $t3,$t3,$t0
+	add $t4,$t4,$t1
+	add $t5,$t5,$t2
+	sb $t3, 0($t6)
+	sb $t4, 1($t6)
+	sb $t5, 2($t6)
+	addi $s4,$s4,1
+	addi $t6, $t6, 4
+	blt $s4,$s5,loop_hue
+	j UpdateImage
+jr $ra
+
 FileSave:
 
 la $a0, OutFile    #open file
