@@ -17,7 +17,7 @@ FIleErrorMsg: .asciiz "File Error\nTerminating program..."
 red_hue: .asciiz "Please Enter a ine (0 - 255) to mod red by"
 green_hue: .asciiz "Please Enter a ine (0 - 255) to mod green by"
 blue_hue: .asciiz "Please Enter a ine (0 - 255) to mod blue by"
-B_string: .asciiz "Please Enter a precentage in Dec format (-1.0 <-> 1.0) :"
+B_string: .asciiz "Please Enter a precentage in Dec format (-100 <-> 100) :"
 .text
 
 Start:
