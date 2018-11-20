@@ -269,24 +269,34 @@ move $t6, $a0
 la $a0, red_hue
 li $v0, 51
 syscall
-move $t0, $v0
+move $t0, $a0
 la $a0, green_hue
 syscall
-move $t1, $v0
+move $t1, $a0
 la $a0, blue_hue
 syscall
-move $t2, $v0
+move $t2, $a0
 li $s4,0
+li $v0, 1
+move $a0, $t0
+syscall
+move $a0, $t1
+syscall
+move $a0, $t2
+syscall
 loop_hue:
 	lb $t3, 0($t6)
 	lb $t4, 1($t6)
 	lb $t5, 2($t6)
 	sll $t3, $t3, 24
-	srl $t3, $t3, 24
-	sll $t4, $t4, 24
-	srl $t4, $t4, 24
 	sll $t5, $t5, 24
+	sll $t4, $t4, 24
+	add $t3,$t3,$t0
+	add $t4,$t4,$t1
+	add $t5,$t5,$t2
+	srl $t4, $t4, 24
 	srl $t5, $t5, 24
+	srl $t3, $t3, 24
 	add $t3,$t3,$t0
 	add $t4,$t4,$t1
 	add $t5,$t5,$t2
@@ -295,7 +305,7 @@ loop_hue:
 	sb $t5, 2($t6)
 	addi $s4,$s4,1
 	addi $t6, $t6, 4
-	blt $s4,$s5,loop_hue
+	blt $s4,262144,loop_hue
 	j UpdateImage
 jr $ra
 
@@ -309,8 +319,8 @@ syscall
 move $s7, $v0        # Store File Pointer
 move $a0, $v0
 li $v0, 15        #Wrtie File To Buffer
-la $a1, buff    
-li $a2, 786486
+la $a1, ImgData    
+li $a2, 1048576
 syscall
 bgt $v0, 0, CloseOut    #if file not read brake
 la $a0,FIleErrorMsg
