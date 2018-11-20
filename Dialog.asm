@@ -17,7 +17,7 @@ FIleErrorMsg: .asciiz "File Error\nTerminating program..."
 red_hue: .asciiz "Please Enter a ine (0 - 255) to mod red by"
 green_hue: .asciiz "Please Enter a ine (0 - 255) to mod green by"
 blue_hue: .asciiz "Please Enter a ine (0 - 255) to mod blue by"
-
+B_string: .asciiz "Please Enter a precentage in Dec format (-1.0 <-> 1.0) :"
 .text
 
 Start:
@@ -149,13 +149,14 @@ jal Flip_h
 j UpdateImage
 
 FilpV:
-
 la $a0, ImgData
 jal Flip_v
 j UpdateImage
 
 
 Brightness:
+la $a0, ImgData
+b B_fun
 j menu
 
 Hue:
@@ -309,6 +310,71 @@ loop_hue:
 	j UpdateImage
 jr $ra
 
+B_fun:
+move $t6, $a0
+li $v0, 51
+la $a0, B_string		#prompt user input
+syscall
+bne $a1, $zero, InputError
+mtc1 $a0, $f0	
+cvt.s.w $f1,$f0		#convert user input 
+li $t0, 100
+mtc1 $t0, $f10
+cvt.s.w $f10, $f10
+div.s $f10, $f1,$f10
+li $t9, 1
+mtc1 $t9, $f2		#loadin 1 to base precentage
+cvt.s.w $f2, $f2
+add.s $f2,$f2,$f10
+li $s4, 0
+loop_b:
+lb $t3, 0($t6)	#load bits
+lb $t4, 1($t6)
+lb $t5, 2($t6)
+sll $t3, $t3, 24	#isolation
+sll $t5, $t5, 24
+sll $t4, $t4, 24
+srl $t4, $t4, 24
+srl $t5, $t5, 24
+srl $t3, $t3, 24
+mtc1 $t3, $f3		
+cvt.s.w $f3,$f3		#convert user input
+mtc1 $t4, $f4
+cvt.s.w $f4,$f4
+mtc1 $t5, $f5
+cvt.s.w $f5,$f5
+mul.s $f3,$f3,$f2
+mul.s $f4,$f4,$f2
+mul.s $f5,$f5,$f2
+li $t9, 255			#loading 266
+mtc1 $t9, $f6
+cvt.s.w $f6, $f6
+c.lt.s $f3, $f6
+bc1t  keepR
+mov.s $f3 $f6
+keepR:
+c.lt.s $f4, $f6
+bc1t keepG
+mov.s $f4, $f6
+keepG:
+c.lt.s $f5, $f6
+bc1t keepB 
+mov.s $f5, $f6 
+keepB:
+
+cvt.w.s $f3,$f3
+cvt.w.s $f4,$f4
+cvt.w.s $f5,$f5
+mfc1 $t3,$f3
+mfc1 $t4,$f4
+mfc1 $t5,$f5
+	sb $t3, 0($t6)
+	sb $t4, 1($t6)
+	sb $t5, 2($t6)
+	addi $s4,$s4,1
+	addi $t6, $t6, 4
+	blt $s4,262144,loop_b
+	j UpdateImage
 FileSave:
 
 la $a0, OutFile    #open file
