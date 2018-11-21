@@ -18,6 +18,7 @@ red_hue: .asciiz "Please Enter a ine (0 - 255) to mod red by"
 green_hue: .asciiz "Please Enter a ine (0 - 255) to mod green by"
 blue_hue: .asciiz "Please Enter a ine (0 - 255) to mod blue by"
 B_string: .asciiz "Please Enter a precentage in Dec format (-100 <-> 100) :"
+S_string: .asciiz "Pleaser Enter a percentage to increase saturation by"
 .text
 
 Start:
@@ -386,30 +387,36 @@ S_fun:
 li $v0, 51	#Syscall 51 to print filter percentage prompt
 la $a0, S_string		#loading address to percentage prompt 
 syscall
+
 bne $a1, $zero, InputError # Ouputing error message if percentage is not okay.
 mtc1 $a0, $f0
 cvt.s.w $f0, $f0
 
 li $t0, 100
-mtc1 $t0, $f1
-cvt.s.w $f1, $f1
+mtc1 $t0, $f10
+cvt.s.w $f10, $f10
 
-div.s $f0, $f0, $f1
+div.s $f0, $f0, $f10
 
 li $t1, 1
-mtc1 $t1, $f2
-cvt.s.w $f2, $f2
+mtc1 $t1, $f11
+cvt.s.w $f11, $f11
 
-addi $t2, $zero, $zero
-mtc1 $t2, $f3
-cvt.s.w $f3, $f3
-
-
-la $t6, ImgData
-li $s4, 0
+addi $t2, $zero, 0
+mtc1 $t2, $f12
+cvt.s.w $f12, $f12
 
 
+la $t6, ImgData	#loading img adrss
+li $s4, 0	#counter
 
+
+## $S2 IS USED TO LOAD THE IMAGE IN A DIFFERENT LOOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+##
+##
+##   IN CASE SOMETHING IS WEIRD
+##
+##
 LoopSat: 
 
 lb $t3, 0($t6)	#load bits
@@ -425,11 +432,104 @@ srl $t3, $t3, 24
 
 bgt $t3, $t4, RB_MAX
 bgt $t4, $t5, G_MAX
+j B_MAX
+
+B_MAX: 
+move $s2, $t3
+move $s3, $t5
+j END
+
+RB_MAX:
+bgt $t3, $t5, R_MAX
+move $s3, $t5		#Blue is the MAX
+move $s2, $t4		# Green is the MIN
+j END
+
+R_MAX:	#Check if green or blue is smaller and assign to minimum
+move $s3, $t3
+bgt $t4, $t5, B_MIN
+move $s2, $t4
+j END
+
+B_MIN: 
+move $s2, $t5		# Blue is the MIN	
+j END
+
+G_MAX:
+move $s3, $t4		#Green is the MAX
+bgt $t3, $t5, B_MIN			
+move $s2, $t3		#Red is the MIN
+j END
+
+END:
+
+#converting MAX and MIN into floating point numbers 
+mtc1 $s2, $f2
+cvt.s.w $f2, $f2
+
+mtc1 $s3, $f3
+cvt.s.w $f3, $f3
+
+#converting the RGB values into floating point numbers
+mtc1 $t3, $f14
+cvt.s.w $f14, $f14
+
+mtc1 $t4, $f15
+cvt.s.w $f15, $f15
+
+mtc1 $t5, $f16			
+cvt.s.w $f16, $f16
+
+mul.s $f2, $f2, $f0		# multiplying the minimum value by the ratio our user wants to change the saturation
+				#	saved in $f0
+
+#DELTA!!!!!!
+sub.s $f9, $f3, $f2		# subtracting minimum ($f2) from max ($f3) to get delta in f9
+
+sub.s $f14, $f14, $f2		#subtracting the minimum from the R Value
+sub.s $f15, $f15, $f2		#subtracting the minimum from the G value
+sub.s $f16, $f16, $f2		#subtracting the minimum from the B Value
+
+
+# NOT SURE WHY WE ARE CHECKING IF THE MINIMUM IS BIGGER THAN 0 (($f12)  #
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+
+
+c.le.s $f2, $f12	#if $f2 (MIN) is bigger than  $f12 then we are branching away from the divide
+bc1t NODIV
+div.s $f3, $f3, $f9    	#Assigning (MAX = MAX / DELTA)
+j ABOVEZERO
+
+NODIV:
+mov.s $f3, $f11
+
+ABOVEZERO:
+
+mul.s	$f14, $f14, $f3			# Multiplying the R value by the maximum 
+mul.s	$f15, $f15, $f3			# Muliplying the G value by the maximum	
+mul.s   $f16, $f16, $f3			# Multiplying the B value by the maximum
 
 
 
+cvt.w.s $f14, $f14	#converting these floating point numbers back to integers. 
+mfc1 $t0, $f14		#moving from coproccessor one (Floating point registers) to the CPU registers
 
+cvt.w.s $f15, $f15	#converting these floating point numbers back to integers. 
+mfc1 $t1, $f15		#moving from coproccessor one (Floating point registers) to the CPU registers
 
+cvt.w.s $f16, $f16	#converting these floating point numbers back to integers. 
+mfc1 $t2, $f16	#moving from coproccessor one (Floating point registers) to the CPU registers
+
+sb $t0, 0($t6) 
+sb $t1, 1($t6)
+sb $t2, 2($t6)
+
+addi $s4, $s4, 1	#increasing counter by 3
+addi $t6, $t6, 4
+blt $s4, 262144, LoopSat
+j UpdateImage
 
 
 FileSave:
@@ -460,5 +560,7 @@ move $a0, $s7          # Setting the file pointer as an argument for the syscall
 syscall                
 
 jr $ra
+
+
 
 
