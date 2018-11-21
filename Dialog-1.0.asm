@@ -11,14 +11,19 @@ buff: .space 786486
 filename: .asciiz "tesla.bmp"
 OutFile: .asciiz "test.bmp"
 .data    
-Welcome: .asciiz "|             Welcome             |\n\n\n| MIPS Image Processor |\n\n***********************************\nPlease Select Your Option:\n\n 1.Filp Horizontally\n 2.Flip Vertically\n 3.Brightness\n 4.Hue\n 5.Vibrance\n 6.Saturation\n 7.Sobel Edge Detection\n 8.Reset Image\n 9.Save File \n 10.Exit\n "
+Welcome: .asciiz "|             Welcome             |\n\n\n| MIPS Image Processor |\n\n***********************************\nPlease Select Your Option:\n\n 1.Filp Horizontally\n 2.Flip Vertically\n 3.Brightness\n 4.Hue\n 5.Vibrance\n 6.Saturation\n 7.Reset Image\n 8.Save File \n 9.Exit\n "
 InError: .asciiz "Wrong Input!\nPlease Try Again"
-FIleErrorMsg: .asciiz "File Error\nTerminating program..."
-red_hue: .asciiz "Please Enter a ine (0 - 255) to mod red by"
-green_hue: .asciiz "Please Enter a ine (0 - 255) to mod green by"
-blue_hue: .asciiz "Please Enter a ine (0 - 255) to mod blue by"
-B_string: .asciiz "Please Enter a precentage in Dec format (-100 <-> 100) :"
-S_string: .asciiz "Pleaser Enter a percentage to increase saturation by"
+FIleErrorMsg: .asciiz "File error\nTerminating program..."
+red_hue: .asciiz "Please enter a ine (0 - 255) to mod red by"
+green_hue: .asciiz "Please enter a ine (0 - 255) to mod green by"
+blue_hue: .asciiz "Please enter a ine (0 - 255) to mod blue by"
+B_string: .asciiz "Please enter a precentage in Dec format (-100 <-> 100) :"
+S_string: .asciiz "Pleaser enter a percentage to increase saturation by"
+HR_string: .asciiz "Please enter a Red Value to change to (0-255)"
+HG_string: .asciiz "Please enter a Green value to change to (0-255)"
+HB_string: .asciiz "Please enter a Blue value to change to (0-255)"
+NegInputError: .asciiz "Your input cannot be negative"
+
 .text
 
 Start:
@@ -130,13 +135,12 @@ beq $t0,$t1, Vibrance
 li $t0, 6
 beq $t0,$t1, Saturation
 li $t0, 7
-beq $t0,$t1, Sobel
-li $t0, 8
 beq $t0,$t1, Reset
-li $t0, 9
+li $t0, 8
 beq $t0,$t1,SaveBMP
-li $t0, 10
+li $t0, 9
 beq $t0,$t1, Exit
+
 InputError:
 la $a0,InError
 li $a1, 2
@@ -381,7 +385,7 @@ mfc1 $t5,$f5
 	addi $t6, $t6, 4
 	blt $s4,262144,loop_b
 	j UpdateImage
-	
+
 S_fun:
 
 li $v0, 51	#Syscall 51 to print filter percentage prompt
@@ -389,6 +393,7 @@ la $a0, S_string		#loading address to percentage prompt
 syscall
 
 bne $a1, $zero, InputError # Ouputing error message if percentage is not okay.
+blt $a0, $zero, InputError # Outputing error message if percentage is negative
 mtc1 $a0, $f0
 cvt.s.w $f0, $f0
 
@@ -444,6 +449,8 @@ bgt $t3, $t5, R_MAX
 move $s3, $t5		#Blue is the MAX
 move $s2, $t4		# Green is the MIN
 j END
+
+
 
 R_MAX:	#Check if green or blue is smaller and assign to minimum
 move $s3, $t3
@@ -560,6 +567,8 @@ move $a0, $s7          # Setting the file pointer as an argument for the syscall
 syscall                
 
 jr $ra
+
+
 
 
 
