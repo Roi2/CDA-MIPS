@@ -1,6 +1,6 @@
 .data 0x10010000
 
-					#Space asigned for MIPS BitMap
+					# Space asigned for MIPS BitMap
 .data 0x10110000
 
 ImgData: .space 1048576
@@ -202,9 +202,9 @@ move $s4, $zero        			# Counter
 
 loop2:
 
-bge $s4, $s5, end_loop  		#Branch to end_loop in case the size has been reached 
-lw $s2, ($s1)				#loading the image into $s2 from $s1
-sw $s2, ($s3)				#storing the image from $s2 into $s3
+bge $s4, $s5, end_loop  		# Branch to end_loop in case the size has been reached 
+lw $s2, ($s1)				# Loading the image into $s2 from $s1
+sw $s2, ($s3)				# Storing the image from $s2 into $s3
 
 addi $s1, $s1, 4			# Iterating by 4 to point to the next word
 addi $s3, $s3, 4			# Iterating by 4 to point to the next word
@@ -228,29 +228,29 @@ loop_Row:
 
 bge $t5, 512, end_Row
 
-move $t0, $a0       			#	load inital pointer
-mulo $t6, $t5, 2048    			#	calculate offset for first address in row
-add $t0, $t0, $t6				#   add offset and inital position == first address in row i
-addi $t1, $t0, 2044    			#	add number bits in each row - 4 to get the last word address
+move $t0, $a0       			# Load inital pointer
+mulo $t6, $t5, 2048    			# Calculate offset for first address in row
+add $t0, $t0, $t6			# Add offset and inital position == first address in row i
+addi $t1, $t0, 2044    			# Add number bits in each row - 4 to get the last word address
 
-li $t4, 0        			# pixel count = 0
+li $t4, 0        			# Pixel count = 0
 
 loop_line:
 bge $t4, 256, end_line
-lw $t2, ($t0)        		# swap
+lw $t2, ($t0)        			# swap
 lw $t3, ($t1)
 sw $t3, ($t0)
 sw $t2, ($t1)
 
-addi $t0, $t0, 4				# go to next 1 word
-subi $t1, $t1, 4				# go back 1 word
+addi $t0, $t0, 4			# Go to next 1 word
+subi $t1, $t1, 4			# Go back 1 word
 
-addiu $t4, $t4, 1   			# next 2 pixels (pixel count +1)
+addiu $t4, $t4, 1   			# Next 2 pixels (pixel count +1)
 j loop_line
 end_line:
 
 
-addi $t5, $t5, 1    			# next row
+addi $t5, $t5, 1    			# Next row
 j loop_Row
 end_Row:
 
@@ -261,7 +261,7 @@ li $t5, 0
 
 flip_vert:
 
-la $s1, ImgData       			#	first word
+la $s1, ImgData       			# First word
 li $s4, 0  				# i = 0
 addi $s0, $s1, 1048572    		# last word 
 
@@ -317,27 +317,27 @@ jr $ra
 B_fun:
 move $t6, $a0
 li $v0, 51
-la $a0, B_string			# prompt user input
+la $a0, B_string			# Prompt user input
 syscall
 bne $a1, $zero, InputError
 mtc1 $a0, $f0	
-cvt.s.w $f1,$f0				# convert user input 
+cvt.s.w $f1,$f0				# Convert user input 
 li $t0, 100
 mtc1 $t0, $f10
 cvt.s.w $f10, $f10
 div.s $f10, $f1,$f10
 li $t9, 1
-mtc1 $t9, $f2				# loading 1 to base precentage
+mtc1 $t9, $f2				# Loading 1 to base precentage
 cvt.s.w $f2, $f2
 add.s $f2,$f2,$f10
 li $s4, 0
 
 loop_b:
-lb $t3, 0($t6)				# load bits
+lb $t3, 0($t6)				# Load bits
 lb $t4, 1($t6)
 lb $t5, 2($t6)
 
-sll $t3, $t3, 24			# isolation
+sll $t3, $t3, 24			# Isolation
 sll $t5, $t5, 24
 sll $t4, $t4, 24
 srl $t4, $t4, 24
