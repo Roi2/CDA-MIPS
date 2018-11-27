@@ -19,9 +19,6 @@ green_hue: .asciiz "Please enter a ine (0 - 255) to mod green by"
 blue_hue: .asciiz "Please enter a ine (0 - 255) to mod blue by"
 B_string: .asciiz "Please enter a precentage in Dec format (-100 <-> 100) :"
 S_string: .asciiz "Pleaser enter a percentage to increase saturation by"
-HR_string: .asciiz "Please enter a Red Value to change to (0-255)"
-HG_string: .asciiz "Please enter a Green value to change to (0-255)"
-HB_string: .asciiz "Please enter a Blue value to change to (0-255)"
 NegInputError: .asciiz "Your input cannot be negative"
 Numogbits: .asciiz "The Number of bits in the image file is - \n"
 .text
@@ -193,7 +190,7 @@ j menu
 UpdateImage:
 la $s1, ImgData        #
 li $s3, 0x10010000    #
-move $s4, $zero        # i = 0
+li $s4, 0        # 
 
 loop2:
 bge $s4, $s5, end_loop
@@ -281,12 +278,12 @@ loop_hue:
 	sll $t3, $t3, 24
 	sll $t5, $t5, 24
 	sll $t4, $t4, 24
-	add $t3,$t3,$t0
-	add $t4,$t4,$t1
-	add $t5,$t5,$t2
 	srl $t4, $t4, 24
 	srl $t5, $t5, 24
 	srl $t3, $t3, 24
+	add $t3,$t3,$t0
+	add $t4,$t4,$t1
+	add $t5,$t5,$t2
 	add $t3,$t3,$t0
 	add $t4,$t4,$t1
 	add $t5,$t5,$t2

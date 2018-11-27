@@ -74,7 +74,7 @@ subi $s5, $s5, 54     			# Subtracting the 54 bmp header bits
 div $s5, $s5, 3        			# Dividing the number of bits by 3 
     	
 la $s0, buff        			# Loading the buffers address
-addi $s0, $s0, 54       		## ????????????????????????????????????   ##
+addi $s0, $s0, 54       		## Avoid haeder info   ##
 
 la $s1, ImgData         		# Loading the address to the image in $s1
 
@@ -228,12 +228,12 @@ loop_Row:
 
 bge $t5, 512, end_Row
 
-move $t0, $a0       			# x = 0, y = 0
-mulo $t6, $t5, 2048    			#
-add $t0, $t0, $t6
-addi $t1, $t0, 2044    			#
+move $t0, $a0       			#	load inital pointer
+mulo $t6, $t5, 2048    			#	calculate offset for first address in row
+add $t0, $t0, $t6				#   add offset and inital position == first address in row i
+addi $t1, $t0, 2044    			#	add number bits in each row - 4 to get the last word address
 
-move $t4, $0        			# i = 0
+li $t4, 0        			# pixel count = 0
 
 loop_line:
 bge $t4, 256, end_line
@@ -242,15 +242,15 @@ lw $t3, ($t1)
 sw $t3, ($t0)
 sw $t2, ($t1)
 
-addi $t0, $t0, 4
-subi $t1, $t1, 4
+addi $t0, $t0, 4				# go to next 1 word
+subi $t1, $t1, 4				# go back 1 word
 
-addiu $t4, $t4, 1   			# i ++
+addiu $t4, $t4, 1   			# next 2 pixels (pixel count +1)
 j loop_line
 end_line:
 
 
-addi $t5, $t5, 1    			# j++
+addi $t5, $t5, 1    			# next row
 j loop_Row
 end_Row:
 
@@ -261,9 +261,9 @@ li $t5, 0
 
 flip_vert:
 
-la $s1, ImgData       			#
+la $s1, ImgData       			#	first word
 li $s4, 0  				# i = 0
-addi $s0, $s1, 1048572    		#
+addi $s0, $s1, 1048572    		# last word 
 
 loop3:
 
@@ -598,7 +598,7 @@ jal Flip_v
 la $a0, ImgData
 jal Flip_h
 la $s0, buff        
-addi $s0, $s0, 54    
+addi $s0, $s0, 54    	#adjst offset to avoid haeder info
 
 la $s1, ImgData        
 
@@ -611,7 +611,7 @@ lb $t1, 1($s1)
 lb $t2, 2($s1)
 sb $t0, ($s0)              
 sb $t1, 1($s0)        
-sb $t2, 2($s0)        		#
+sb $t2, 2($s0)        		# convert from 4 component rgb to 3 and load to buffer
 addi $s0, $s0, 3
 addi $s1, $s1, 4
 
