@@ -9,7 +9,7 @@ ImgData: .space 1048576
 buff: .space 786486     
 
 GreyscaleR: .float 0.2989		# Specific Greyscale R value 
-GreyscaleG: .float 0.5870		# Soecific Greyscale G value
+GreyscaleG: .float 0.5870		# Specific Greyscale G value
 GreyscaleB: .float 0.1140		# Specific Greyscale B value 
 
 filename: .asciiz "tesla.bmp"		# Name of our predefined file.
@@ -64,7 +64,7 @@ li $v0, 56
 syscall
 
 # Close the file
-li   $v0, 16          			# Syscall for closing a file
+li   $v0, 16          			# Syscall 16 for closing a file
 move $a0, $s1         			# File pointer
 syscall                			# Close file
 
