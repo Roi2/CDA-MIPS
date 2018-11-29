@@ -219,7 +219,7 @@ j menu
 
 Flip_h:					# Loop to begin flipping the image horizontally
 
-li $t5, 0       			# j = 0
+li $t5, 0       			# RowCount
 
 loop_Row:
 
@@ -290,21 +290,18 @@ li $s4,0				# Resetting our counter
 loop_neg:
 
 lb $t3, 0($t6)	
-lb $t4, 1($t6)
+lb $t4, 1($t6)				#Loadin RGB Values
 lb $t5, 2($t6)
 sll $t3, $t3, 24
-sll $t5, $t5, 24
+sll $t5, $t5, 24			
 sll $t4, $t4, 24
 
 subu $t3,$t7,$t3
-subu $t4,$t7,$t4
+subu $t4,$t7,$t4			#Negate RGB components 
 subu $t5,$t7,$t5
 srl $t4, $t4, 24
 srl $t5, $t5, 24
 srl $t3, $t3, 24
-add $t3,$t3,$t0
-add $t4,$t4,$t1
-add $t5,$t5,$t2
 sb $t3, 0($t6)
 sb $t4, 1($t6)
 sb $t5, 2($t6)
