@@ -303,10 +303,10 @@ srl $t4, $t4, 24
 srl $t5, $t5, 24
 srl $t3, $t3, 24
 sb $t3, 0($t6)
-sb $t4, 1($t6)
+sb $t4, 1($t6)				#Storing Components
 sb $t5, 2($t6)
 addi $s4,$s4,1
-addi $t6, $t6, 4
+addi $t6, $t6, 4			#Go to next Word
 blt $s4,$s5,loop_neg
 	
 jr $ra
