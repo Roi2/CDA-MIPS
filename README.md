@@ -3,7 +3,7 @@ The following repository is the contribution of:
   Moath Abdelkarim (https://github.com/moathab),
    Roi Asher (https://github.com/Roi2),
    Alexander Alava (https://github.com/AlexanderAlava),
-   Osama Namrouti,
+   Osama Namrouti, and
    Mansour Al-Khaldi
   
   
