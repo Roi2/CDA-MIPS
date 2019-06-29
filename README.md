@@ -7,9 +7,8 @@ The following repository is the contribution of:
    Mansour Al-Khaldi
   
   
-  Alpha Image Processor 
-  
-This is a MIPS application designed to process images using bit manipulation techniques. 
+Alpha Image Processor: This is a MIPS application designed to process images using bit manipulation techniques. 
+ 
  
 More information on the underlying techniques learned and references in the following document: 
  
